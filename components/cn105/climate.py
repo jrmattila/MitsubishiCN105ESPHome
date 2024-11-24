@@ -1,6 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import climate, uart, select, sensor, binary_sensor, text_sensor
+from esphome import automation
 
 from esphome.components.logger import HARDWARE_UART_TO_SERIAL
 from esphome.components.uart import UARTParityOptions
@@ -53,6 +54,7 @@ DEFAULT_SWING_MODES = ["OFF", "VERTICAL", "HORIZONTAL", "BOTH"]
 CN105Climate = cg.global_ns.class_("CN105Climate", climate.Climate, cg.Component)
 
 CONF_REMOTE_TEMP_TIMEOUT = "remote_temperature_timeout"
+CONF_ON_REMOTE_TEMP_TIMEOUT = "on_remote_temperature_timeout"
 CONF_DEBOUNCE_DELAY = "debounce_delay"
 
 VaneOrientationSelect = cg.global_ns.class_(
@@ -180,6 +182,7 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
         cv.Optional(CONF_REMOTE_TEMP_TIMEOUT, default="never"): cv.All(
             cv.update_interval
         ),
+        cv.Optional(CONF_ON_REMOTE_TEMP_TIMEOUT): automation.validate_automation(single=True),
         cv.Optional(CONF_DEBOUNCE_DELAY, default="100ms"): cv.All(cv.update_interval),
         cv.Optional(
             CONF_HP_UP_TIME_CONNECTION_SENSOR
@@ -226,7 +229,15 @@ def to_code(config):
     for mode in supports[CONF_SWING_MODE]:
         cg.add(traits.add_supported_swing_mode(climate.CLIMATE_SWING_MODES[mode]))
 
+
     cg.add(var.set_remote_temp_timeout(config[CONF_REMOTE_TEMP_TIMEOUT]))
+
+    if CONF_ON_REMOTE_TEMP_TIMEOUT in config:
+        yield automation.build_automation(
+            var.on_remote_temp_timeout_trigger_,
+            [],
+            config[CONF_ON_REMOTE_TEMP_TIMEOUT]
+        )
 
     cg.add(var.set_debounce_delay(config[CONF_DEBOUNCE_DELAY]))
 

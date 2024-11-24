@@ -14,6 +14,7 @@
 #include "sub_mode_sensor.h"
 #include <esphome/components/sensor/sensor.h>
 #include <esphome/components/binary_sensor/binary_sensor.h>
+#include <esphome/core/automation.h>
 #include "cycle_management.h"
 
 #ifdef USE_ESP32
@@ -112,6 +113,9 @@ public:
     void sendRemoteTemperature();
 
     void set_remote_temp_timeout(uint32_t timeout);
+    Trigger<> *on_remote_temp_timeout_trigger_ = new esphome::Trigger<>();
+    Trigger<> *get_on_remote_temp_timeout_trigger() const { return this->on_remote_temp_timeout_trigger_; }
+    // Trigger<> *get_on_remote_temp_timeout_trigger() { return &this->on_remote_temp_timeout_trigger_; }
 
     void set_debounce_delay(uint32_t delay);
 
@@ -287,6 +291,7 @@ private:
 
 
     uint32_t remote_temp_timeout_;
+
     uint32_t debounce_delay_;
 
     int baud_ = 0;

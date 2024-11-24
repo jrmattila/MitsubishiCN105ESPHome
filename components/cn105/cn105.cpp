@@ -69,7 +69,8 @@ void CN105Climate::pingExternalTemperature() {
     this->set_timeout(SHEDULER_REMOTE_TEMP_TIMEOUT, this->remote_temp_timeout_, [this]() {
         ESP_LOGW(LOG_ACTION_EVT_TAG, "Remote temperature timeout occured, fall back to internal temperature!");
         this->set_remote_temperature(0);
-        });
+        this->on_remote_temp_timeout_trigger_->trigger();
+    });
 }
 
 void CN105Climate::set_remote_temp_timeout(uint32_t timeout) {
